@@ -34,3 +34,17 @@ Les décisions prises en l'absence de précision explicite sont documentées ici
   listés à la section 4. `userInterfaceStyle` réglé sur `dark` puisque la direction design
   (section 3) est exclusivement sombre — pas de mode clair prévu, et la section 10 exclut
   explicitement un mode sombre "optionnel" (donc le mode sombre est permanent, pas un choix).
+
+- **Étape 2** : `@expo/vector-icons` (Ionicons) est utilisé pour l'étoile de favori et les
+  icônes d'interface — c'est un jeu de pictogrammes, pas une bibliothèque de composants imposant
+  son propre style, donc compatible avec l'interdiction de la section 10. Le texte du bouton
+  primaire (`Cta`) est en `couleurs.nuit` plutôt que `couleurs.craie` : c'est le seul choix qui
+  respecte le contraste minimum de 4,5:1 sur fond violet (la section 3 ne précise la couleur de
+  texte que pour le bouton secondaire). L'écran de démonstration interne vit à la route
+  top-level `/demo`, hors des groupes `(auth)/(onboarding)/(app)` puisqu'il n'appartient à
+  aucun flux utilisateur réel ; il sera retiré ou déplacé derrière un accès développeur avant la
+  soumission App Store (guideline 2.3.1, section 5, pas de code destiné à un usage caché — ici
+  c'est un outil de développement temporaire, pas une fonctionnalité dissimulée).
+  `react-native-worklets` et `babel-preset-expo` doivent être ajoutés explicitement en
+  dépendance top-level : le gestionnaire npm ne les hissait pas automatiquement dans cet
+  environnement, provoquant un échec de bundling silencieux sans cet ajout.

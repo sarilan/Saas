@@ -13,6 +13,7 @@ import { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { ToastProvider } from '../components/Toast';
 import { couleurs } from '../theme/tokens';
 
 SplashScreen.preventAutoHideAsync();
@@ -40,13 +41,15 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: couleurs.nuit }}>
       <SafeAreaProvider>
         <StatusBar style="light" />
-        <Stack
-          screenOptions={{
-            headerShown: false,
-            contentStyle: { backgroundColor: couleurs.nuit },
-            animation: 'fade',
-          }}
-        />
+        <ToastProvider>
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              contentStyle: { backgroundColor: couleurs.nuit },
+              animation: 'fade',
+            }}
+          />
+        </ToastProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );
