@@ -90,3 +90,17 @@ Les décisions prises en l'absence de précision explicite sont documentées ici
   Un bouton « Se déconnecter » minimal a été ajouté à l'écran Compte (encore un placeholder par
   ailleurs) pour que le cycle complet connexion/déconnexion soit testable dès cette étape ; le
   reste de l'écran Compte est construit à l'étape 10.
+
+- **Étape 5** : les 10 niches, les tons et le rattachement des plateformes ne sont pas énumérés
+  dans le brief — liste choisie pour un public de créateurs francophones (Beauté, Fitness,
+  Cuisine, Business & argent, Développement personnel, Tech & gadgets, Mode, Voyage, Gaming,
+  Parentalité) ; les tons (Direct, Complice, Provocateur, Inspirant, Humoristique, Sérieux)
+  sont ceux qui infléchiront le prompt de génération à l'étape 6. `(onboarding)/[step].tsx` est
+  une unique route dynamique comme le prescrit l'architecture (section 2), avec un store
+  Zustand (`store/onboarding.ts`) qui accumule les trois choix en mémoire sans toucher la base
+  tant que l'étape « ton » n'est pas validée — un seul `update` Postgres à la fin, conforme à
+  « écrit le profil en base à la validation, pas à chaque tap ». Le fichier de types Supabase
+  généré à la main (étape 3) avait oublié le champ `Relationships` requis par les types
+  génériques de postgrest-js : sans lui, toute méthode `.update()`/`.insert()` typée retombe
+  silencieusement sur `never`. Corrigé ici — un rappel que la régénération réelle
+  (`supabase gen types`) reste nécessaire dès qu'un projet est lié.

@@ -38,6 +38,7 @@ export type Database = {
           generations_restantes?: number;
           created_at?: string;
         };
+        Relationships: [];
       };
       generations: {
         Row: {
@@ -67,6 +68,7 @@ export type Database = {
           hooks?: Json;
           created_at?: string;
         };
+        Relationships: [];
       };
       favoris: {
         Row: {
@@ -87,6 +89,7 @@ export type Database = {
           texte?: string;
           created_at?: string;
         };
+        Relationships: [];
       };
       signalements: {
         Row: {
@@ -110,6 +113,7 @@ export type Database = {
           motif?: string | null;
           created_at?: string;
         };
+        Relationships: [];
       };
     };
     Views: Record<string, never>;
