@@ -34,6 +34,7 @@ supabase secrets set ANTHROPIC_API_KEY=sk-ant-...
 supabase secrets set REVENUECAT_WEBHOOK_SECRET=... REVENUECAT_SECRET_API_KEY=sk_...
 supabase functions deploy generate
 supabase functions deploy revenuecat-webhook
+supabase functions deploy delete-account
 ```
 
 Configurer ensuite dans le dashboard RevenueCat un webhook pointant vers l'URL de la fonction
@@ -43,6 +44,23 @@ Configurer ensuite dans le dashboard RevenueCat un webhook pointant vers l'URL d
 automatiquement par la plateforme dans chaque Edge Function ; seule `ANTHROPIC_API_KEY` doit
 être définie manuellement, et uniquement comme secret de fonction — jamais dans le `.env` du
 client.
+
+## Build EAS
+
+```bash
+npx eas-cli login
+npx eas-cli init                       # lie le projet, renseigne extra.eas.projectId
+npx eas-cli build --profile development --platform ios   # build simulateur, développement
+npx eas-cli build --profile preview --platform ios        # build interne, appareil réel
+npx eas-cli build --profile production --platform ios     # build de soumission
+npx eas-cli submit --profile production --platform ios
+```
+
+Les profils `eas.json` transmettent les variables `EXPO_PUBLIC_*` au build ; elles doivent être
+enregistrées comme variables d'environnement EAS (`eas env:create`) plutôt que commitées.
+`eas init` n'a pas été exécuté dans ce dépôt (pas de compte Expo/EAS disponible pendant la
+réalisation) : `app.json` n'a donc pas encore de `extra.eas.projectId` ni de `owner` — la
+première exécution d'`eas init` les ajoutera automatiquement.
 
 ## Hypothèses
 
@@ -236,3 +254,43 @@ Les décisions prises en l'absence de précision explicite sont documentées ici
     aurait débordé de l'écran sans recours.
   - L'écran `/demo` (outil de développement interne, hors périmètre App Store) n'a pas reçu
     cette passe : ce n'est pas un écran du parcours utilisateur réel.
+
+- **Étape 12** : `eas.json` définit trois profils (`development`, `preview`, `production`) qui
+  transmettent les variables `EXPO_PUBLIC_*` au build ; le projet n'a jamais été lié à un compte
+  EAS réel pendant la réalisation (`eas init` reste à exécuter, ce qui ajoutera
+  `extra.eas.projectId`/`owner` à `app.json`). L'icône, l'icône adaptative Android et l'écran de
+  lancement sont générés par un script Python/Pillow ad hoc (`theme/tokens.ts` → nuit + violet,
+  monogramme « H » en Archivo ExtraBold) faute d'outil de génération d'image dans cet
+  environnement : un vrai jeu d'icônes dessiné par un designer doit remplacer ces fichiers avant
+  soumission — ils respectent la direction (sombre, dense, typographique, sans dégradé ni
+  illustration) mais n'ont pas la finition d'un travail de design final. `PrivacyInfo.xcprivacy`
+  est déclaré via `expo.ios.privacyManifests` dans `app.json` (mécanisme natif Expo depuis le SDK
+  50, qui génère le fichier réel au build) plutôt qu'un fichier XML statique dans un dossier
+  `ios/` inexistant en workflow managé. Les catégories déclarées correspondent aux données
+  réellement collectées (identifiant de compte, e-mail, contenu utilisateur soumis) et aux trois
+  API à raison requise citées par le brief (espace disque, horodatage de fichier, préférences
+  utilisateur) — les codes de raison (`E174.1`, `C617.1`, `CA92.1`) sont les plus généralement
+  applicables pour ces catégories ; à revérifier contre l'usage réel des dépendances natives une
+  fois le premier build EAS produit (`eas build` peut lister les APIs à raison requise
+  effectivement utilisées). Les notes de revue App Store
+  (`docs/app-store-review-notes.md`) documentent explicitement pourquoi un compte de démonstration
+  classique par OTP est impraticable pour un reviewer Apple et proposent deux solutions, à
+  trancher avant soumission — c'est la seule partie de la guideline 2.1 qui ne peut pas être
+  résolue uniquement par du code.
+
+## Écarts connus par rapport à un livrable prêt pour la soumission App Store
+
+Ce dépôt réalise l'intégralité des 12 étapes du brief avec un code fonctionnel et testé
+(`npm run typecheck`, `npm run lint`, `deno check`/`deno lint` sur les Edge Functions, export
+Metro réussi après chaque étape). Ce qui reste explicitement hors de portée d'une session de
+génération de code, noté ici plutôt que passé sous silence :
+
+- Aucun projet Supabase, RevenueCat ou compte Apple Developer réel n'a été provisionné : les
+  identifiants dans `.env`/les secrets de fonctions sont à renseigner par qui déploie ce dépôt.
+- L'icône et l'écran de lancement sont un placeholder généré par script, pas un travail de
+  design final.
+- Le compte de démonstration pour la revue Apple (guideline 2.1) doit être créé manuellement
+  (voir `docs/app-store-review-notes.md`).
+- Les textes juridiques (`/mentions-legales`, `/confidentialite`) sont un contenu générique
+  écrit pour ce projet, à faire relire par un juriste.
+- `eas init` n'a pas été exécuté : pas de `projectId` EAS lié.
