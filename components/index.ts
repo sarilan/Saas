@@ -1,3 +1,4 @@
+export { Alerte } from './Alerte';
 export { Chip } from './Chip';
 export { Cta } from './Cta';
 export { HookCard } from './HookCard';

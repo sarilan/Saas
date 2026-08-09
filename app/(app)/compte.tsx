@@ -1,12 +1,21 @@
 import { StyleSheet, Text, View } from 'react-native';
 
+import { Cta } from '../../components/Cta';
 import { strings } from '../../lib/i18n';
+import { supabase } from '../../lib/supabase/client';
 import { couleurs, espaces, typo } from '../../theme/tokens';
 
 export default function Compte() {
   return (
     <View style={styles.conteneur}>
       <Text style={typo.titre}>{strings.onglets.compte}</Text>
+      <View style={styles.action}>
+        <Cta
+          libelle={strings.compte.deconnexion}
+          variante="secondaire"
+          onPress={() => supabase.auth.signOut()}
+        />
+      </View>
     </View>
   );
 }
@@ -18,5 +27,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: espaces.l,
+    gap: espaces.xl,
+  },
+  action: {
+    width: '100%',
   },
 });

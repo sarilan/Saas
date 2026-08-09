@@ -75,3 +75,18 @@ Les décisions prises en l'absence de précision explicite sont documentées ici
   Supabase (`lib/supabase/client.ts`) lève une erreur explicite si les variables
   `EXPO_PUBLIC_SUPABASE_URL` / `EXPO_PUBLIC_SUPABASE_ANON_KEY` sont absentes plutôt que
   d'échouer silencieusement plus tard ; voir `.env.example`.
+
+- **Étape 4** : la garde de session (`app/_layout.tsx`) utilise l'API déclarative
+  `Stack.Protected` d'expo-router plutôt qu'une redirection impérative — c'est le mécanisme
+  recommandé pour ce cas dans les versions récentes du router, et il évite les flashs d'écran
+  incorrect le temps qu'un `useEffect` se déclenche. Les routes hors groupe (`/demo`,
+  `/mentions-legales`, `/confidentialite`) restent volontairement accessibles quel que soit
+  l'état de session : ce sont des pages publiques ou un outil de développement, pas des écrans
+  du parcours utilisateur protégé. Sign in with Apple ne demande que le scope `EMAIL` (pas
+  `FULL_NAME`) puisque l'app n'affiche le nom de l'utilisateur nulle part — strict nécessaire
+  au sens de la guideline 4.8. Les pages `/mentions-legales` et `/confidentialite` contiennent
+  un texte juridique générique écrit pour ce projet ; à faire relire par un juriste avant toute
+  soumission réelle sur l'App Store. L'adresse de contact provisoire est `support@hookgen.app`.
+  Un bouton « Se déconnecter » minimal a été ajouté à l'écran Compte (encore un placeholder par
+  ailleurs) pour que le cycle complet connexion/déconnexion soit testable dès cette étape ; le
+  reste de l'écran Compte est construit à l'étape 10.
