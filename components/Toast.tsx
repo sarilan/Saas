@@ -3,6 +3,7 @@ import { StyleSheet, Text } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { useReduceMotion } from '../hooks/useReduceMotion';
 import { couleurs, espaces, polices, rayons } from '../theme/tokens';
 
 type ToastContexteValeur = {
@@ -20,6 +21,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const minuteurCache = useRef<ReturnType<typeof setTimeout> | null>(null);
   const minuteurDisparition = useRef<ReturnType<typeof setTimeout> | null>(null);
   const insets = useSafeAreaInsets();
+  const reduireMouvement = useReduceMotion();
+  const dureeTransition = reduireMouvement ? 0 : DUREE_TRANSITION_MS;
 
   const afficherToast = useCallback(
     (texte: string) => {
@@ -27,14 +30,14 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       if (minuteurDisparition.current) clearTimeout(minuteurDisparition.current);
 
       setMessage(texte);
-      opacite.value = withTiming(1, { duration: DUREE_TRANSITION_MS });
+      opacite.value = withTiming(1, { duration: dureeTransition });
 
       minuteurCache.current = setTimeout(() => {
-        opacite.value = withTiming(0, { duration: DUREE_TRANSITION_MS + 20 });
-        minuteurDisparition.current = setTimeout(() => setMessage(null), DUREE_TRANSITION_MS + 40);
+        opacite.value = withTiming(0, { duration: dureeTransition });
+        minuteurDisparition.current = setTimeout(() => setMessage(null), dureeTransition + 20);
       }, DUREE_AFFICHAGE_MS);
     },
-    [opacite]
+    [opacite, dureeTransition]
   );
 
   useEffect(

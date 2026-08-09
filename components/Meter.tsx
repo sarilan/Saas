@@ -7,7 +7,9 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-import { BUDGET_ORAL_SECONDES } from '../lib/duree';
+import { useReduceMotion } from '../hooks/useReduceMotion';
+import { BUDGET_ORAL_SECONDES, formaterDuree } from '../lib/duree';
+import { strings } from '../lib/i18n';
 import { couleurs, dureeAnimation } from '../theme/tokens';
 
 // Échelle visuelle du repère : deux fois le budget, pour que le dépassement reste lisible
@@ -21,12 +23,15 @@ type MeterProps = {
 };
 
 export function Meter({ dureeSecondes, indexCascade = 0, animer = true }: MeterProps) {
+  const reduireMouvement = useReduceMotion();
+  const animerReellement = animer && !reduireMouvement;
+
   const progression = useSharedValue(0);
   const cible = Math.min(dureeSecondes / PLAGE_MAX_SECONDES, 1);
   const dansLeBudget = dureeSecondes <= BUDGET_ORAL_SECONDES;
 
   useEffect(() => {
-    if (!animer) {
+    if (!animerReellement) {
       progression.value = cible;
       return;
     }
@@ -34,14 +39,20 @@ export function Meter({ dureeSecondes, indexCascade = 0, animer = true }: MeterP
       indexCascade * dureeAnimation.cascade,
       withTiming(cible, { duration: dureeAnimation.moyenne })
     );
-  }, [cible, animer, indexCascade, progression]);
+  }, [cible, animerReellement, indexCascade, progression]);
 
   const styleAnime = useAnimatedStyle(() => ({
     width: `${progression.value * 100}%`,
   }));
 
   return (
-    <View style={styles.piste}>
+    <View
+      style={styles.piste}
+      accessible
+      accessibilityRole="progressbar"
+      accessibilityLabel={strings.hookCard.dureeOrale}
+      accessibilityValue={{ text: formaterDuree(dureeSecondes) }}
+    >
       <Animated.View
         style={[
           styles.remplissage,

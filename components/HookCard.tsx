@@ -1,11 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import * as Clipboard from 'expo-clipboard';
 import * as Haptics from 'expo-haptics';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import type { AccessibilityActionEvent } from 'react-native';
+import { PixelRatio, Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { calculerDureeSecondes, formaterDuree } from '../lib/duree';
+import { BUDGET_ORAL_SECONDES, calculerDureeSecondes, formaterDuree } from '../lib/duree';
 import { strings } from '../lib/i18n';
-import { couleurs, espaces, polices, typo } from '../theme/tokens';
+import { RATIO_INTERLIGNE_ACCROCHE, couleurs, espaces, polices, typo } from '../theme/tokens';
 import { Meter } from './Meter';
 import { useToast } from './Toast';
 
@@ -40,16 +41,52 @@ export function HookCard({
     onToggleFavori();
   }
 
+  // La carte est un seul élément VoiceOver opaque (accessible={true}) : ses
+  // enfants (étoile, barre de durée) ne seraient de toute façon pas
+  // atteignables individuellement par balayage. Le favori et le
+  // signalement sont donc exposés comme actions d'accessibilité (rotor),
+  // avec un label qui porte toute l'information sinon donnée visuellement
+  // par la barre de durée voisine.
+  function gererActionAccessibilite(evenement: AccessibilityActionEvent) {
+    if (evenement.nativeEvent.actionName === 'favori') {
+      basculerFavori();
+    } else if (evenement.nativeEvent.actionName === 'signaler') {
+      onSignaler();
+    }
+  }
+
+  const dansLeBudget = duree <= BUDGET_ORAL_SECONDES;
+  const labelAccessible = [
+    texte,
+    `${strings.hookCard.dureeOrale} ${formaterDuree(duree)}`,
+    dansLeBudget ? 'dans le budget de 3 secondes' : 'au-delà du budget de 3 secondes',
+    enFavori ? strings.hookCard.retirerFavori : strings.hookCard.ajouterFavori,
+  ].join('. ');
+
   return (
     <Pressable
       onPress={copier}
       onLongPress={onSignaler}
       delayLongPress={450}
+      accessible
       accessibilityRole="button"
-      accessibilityLabel={`${texte}. ${strings.hookCard.astuceCopie}`}
+      accessibilityLabel={labelAccessible}
+      accessibilityHint={strings.hookCard.astuceCopie}
+      accessibilityActions={[
+        { name: 'favori', label: enFavori ? strings.hookCard.retirerFavori : strings.hookCard.ajouterFavori },
+        { name: 'signaler', label: strings.signalement.titre },
+      ]}
+      onAccessibilityAction={gererActionAccessibilite}
       style={({ pressed }) => [styles.carte, pressed && styles.pressee]}
     >
-      <Text style={typo.accroche}>{texte}</Text>
+      <Text
+        style={[
+          typo.accroche,
+          { lineHeight: typo.accroche.fontSize * RATIO_INTERLIGNE_ACCROCHE * PixelRatio.getFontScale() },
+        ]}
+      >
+        {texte}
+      </Text>
       <View style={styles.outils}>
         <Pressable
           onPress={basculerFavori}
@@ -70,7 +107,8 @@ export function HookCard({
         <Meter dureeSecondes={duree} indexCascade={index} animer={animer} />
         <Text
           style={styles.duree}
-          accessibilityLabel={`${strings.hookCard.dureeOrale} ${formaterDuree(duree)}`}
+          accessibilityElementsHidden
+          importantForAccessibility="no-hide-descendants"
         >
           {formaterDuree(duree)}
         </Text>

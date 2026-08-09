@@ -1,6 +1,7 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Alerte } from '../../components/Alerte';
 import { Cta } from '../../components/Cta';
@@ -49,7 +50,7 @@ export default function Code() {
   }
 
   return (
-    <View style={styles.conteneur}>
+    <SafeAreaView style={styles.conteneur} edges={['top', 'bottom']}>
       <View style={styles.entete}>
         <Text style={typo.grandTitre}>{strings.code.titre}</Text>
         <Text style={[typo.corps, styles.sousTitre]}>
@@ -103,7 +104,7 @@ export default function Code() {
           <Text style={styles.texteLien}>{strings.code.modifierEmail}</Text>
         </Pressable>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -112,7 +113,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: couleurs.nuit,
     padding: espaces.l,
-    paddingTop: espaces.xl * 2,
+    paddingTop: espaces.xl,
     gap: espaces.xl,
   },
   entete: {

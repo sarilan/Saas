@@ -1,12 +1,13 @@
 import { Stack } from 'expo-router';
 import { ScrollView, StyleSheet, Text } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { strings } from '../lib/i18n';
 import { couleurs, espaces, typo } from '../theme/tokens';
 
 export default function MentionsLegales() {
   return (
-    <>
+    <SafeAreaView style={styles.conteneur} edges={['bottom']}>
       <Stack.Screen
         options={{
           headerShown: true,
@@ -15,7 +16,7 @@ export default function MentionsLegales() {
           headerTintColor: couleurs.craie,
         }}
       />
-      <ScrollView style={styles.conteneur} contentContainerStyle={styles.contenu}>
+      <ScrollView contentContainerStyle={styles.contenu}>
         <Text style={typo.grandTitre}>{strings.legal.cguTitre}</Text>
         {strings.legal.cgu.map((paragraphe) => (
           <Text key={paragraphe.slice(0, 24)} style={typo.corps}>
@@ -23,7 +24,7 @@ export default function MentionsLegales() {
           </Text>
         ))}
       </ScrollView>
-    </>
+    </SafeAreaView>
   );
 }
 

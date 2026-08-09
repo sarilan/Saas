@@ -2,6 +2,7 @@ import { useMutation } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Alerte } from '../../components/Alerte';
 import { Chip } from '../../components/Chip';
@@ -91,7 +92,7 @@ export default function Creer() {
       : null;
 
   return (
-    <View style={styles.conteneur}>
+    <SafeAreaView style={styles.conteneur} edges={['top']}>
       <View style={styles.entete}>
         <Text style={typo.titre}>{strings.creer.titre}</Text>
         <Text style={styles.compteur}>
@@ -202,7 +203,7 @@ export default function Creer() {
           onPress={() => setAccrocheSignalee(null)}
         />
       </Sheet>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -213,7 +214,7 @@ const styles = StyleSheet.create({
   },
   entete: {
     paddingHorizontal: espaces.l,
-    paddingTop: espaces.xl,
+    paddingTop: espaces.m,
     paddingBottom: espaces.m,
     flexDirection: 'row',
     alignItems: 'baseline',

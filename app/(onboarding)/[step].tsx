@@ -1,6 +1,7 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Alerte } from '../../components/Alerte';
 import { Chip } from '../../components/Chip';
@@ -84,7 +85,7 @@ export default function OnboardingEtape() {
   }
 
   return (
-    <View style={styles.conteneur}>
+    <SafeAreaView style={styles.conteneur} edges={['top', 'bottom']}>
       <Steps total={ETAPES.length} actuel={indexEtape} />
 
       {indexEtape > 0 ? (
@@ -121,7 +122,7 @@ export default function OnboardingEtape() {
         desactive={!valeur}
         chargement={enEnregistrement}
       />
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -130,7 +131,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: couleurs.nuit,
     padding: espaces.l,
-    paddingTop: espaces.xl * 2,
+    paddingTop: espaces.xl,
     gap: espaces.l,
   },
   boutonRetour: {

@@ -2,6 +2,7 @@ import { useMutation } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Chip } from '../../components/Chip';
 import { Cta } from '../../components/Cta';
@@ -85,8 +86,9 @@ export default function Compte() {
   };
 
   return (
-    <ScrollView style={styles.conteneur} contentContainerStyle={styles.contenu}>
-      <Text style={typo.grandTitre}>{strings.compte.titre}</Text>
+    <SafeAreaView style={styles.conteneur} edges={['top']}>
+      <ScrollView style={styles.defiler} contentContainerStyle={styles.contenu}>
+        <Text style={typo.grandTitre}>{strings.compte.titre}</Text>
 
       <View style={styles.section}>
         <LigneInfo libelle={strings.compte.emailLabel} valeur={session?.user.email ?? ''} />
@@ -229,7 +231,8 @@ export default function Compte() {
           onPress={() => setSuppressionOuverte(false)}
         />
       </Sheet>
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
@@ -274,9 +277,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: couleurs.nuit,
   },
+  defiler: {
+    flex: 1,
+  },
   contenu: {
     padding: espaces.l,
-    paddingTop: espaces.xl,
+    paddingTop: espaces.m,
     gap: espaces.l,
     paddingBottom: espaces.xl * 2,
   },

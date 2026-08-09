@@ -198,3 +198,41 @@ Les décisions prises en l'absence de précision explicite sont documentées ici
   à l'étape 3) sans repasser par l'onboarding. Les liens CGU/confidentialité et l'adresse de
   contact (section 7, point 3) sont désormais aussi présents sur Compte, en plus de l'accueil et
   du paywall.
+
+- **Étape 11** : passe d'accessibilité complète sur l'app.
+  - *Dynamic Type* : `theme/tokens.ts` n'impose plus de `lineHeight` fixe en points sur les
+    styles de texte (`grandTitre`, `titre`, `corps`, `microLibelle`) — une valeur figée ne suit
+    pas la mise à l'échelle du texte système et finit par tronquer les lignes aux plus grandes
+    tailles d'accessibilité ; laisser React Native calculer l'interligne naturel scale
+    correctement. Seul `accroche` garde un ratio explicite (1.34, imposé par le brief), calculé
+    à l'usage dans `HookCard` via `PixelRatio.getFontScale()`.
+  - *VoiceOver* : `HookCard` est un seul élément d'accessibilité opaque (un parent `accessible`
+    masque de toute façon ses enfants à VoiceOver) avec un label complet (texte, durée, statut
+    budget, statut favori) et expose favori/signalement comme `accessibilityActions` plutôt que
+    des sous-contrôles inatteignables. `Meter` porte enfin son propre
+    `accessibilityRole="progressbar"` avec la durée en valeur — il n'avait aucune sémantique
+    d'accessibilité depuis l'étape 2, alors que le brief l'exige explicitement (« y compris
+    l'étoile et la barre de durée »). Le texte de durée visuel redondant est masqué de l'arbre
+    d'accessibilité (`accessibilityElementsHidden`) pour éviter une double annonce.
+  - *Contraste* : audit chiffré (formule WCAG) de toutes les paires texte/fond de la palette.
+    Deux vraies violations trouvées et corrigées : le texte `craie` sur puce/bouton/badge violet
+    ne passait qu'à 3,53:1 (`Chip` actif, badge « Économise X % » du paywall) — remplacé par
+    `nuit`, seul choix conforme sur ce fond (même logique déjà appliquée à `Cta` primaire à
+    l'étape 2). Le texte `nuit` sur fond violet lui-même ne passait qu'à 4,49:1, sous le seuil
+    de 4,5:1 — le jeton `violet` est décalé de `#7B61FF` à `#8167FF` (imperceptible visuellement,
+    remonte le contraste à 4,78:1). Un nouveau jeton `violetClair` (`#A08CFF`) est réservé au
+    texte/icône sur fond sombre (ex. onglet actif) : `violet` de base n'y passait qu'à ~4,15:1.
+  - *Mouvement réduit* : nouveau hook `useReduceMotion` (lit `AccessibilityInfo.isReduceMotionEnabled`
+    et s'abonne à `reduceMotionChanged`). `Meter`, `Sheet`, `Toast` et `SqueletteCarte` sautent
+    directement à l'état final (durée à 0, ou rendu statique pour le squelette) plutôt que de
+    seulement raccourcir leurs animations, conformément à « coupées, pas seulement raccourcies ».
+  - *Zones sûres* : la plupart des écrans utilisaient un `paddingTop` fixe approximatif plutôt
+    que les vraies valeurs d'insets — fragile d'un appareil à l'autre (encoche, Dynamic Island)
+    et ne gérait jamais l'indicateur d'accueil en bas. Tous les écrans passent par `SafeAreaView`
+    de `react-native-safe-area-context` : `top`+`bottom` pour les écrans hors onglets, `top`
+    seul dans `(app)` (la barre d'onglets gère déjà son propre inset bas), `bottom` seul pour les
+    pages légales (leur en-tête natif gère le haut). Au passage, Favoris et Historique, qui
+    n'étaient pas défilables, sont passés dans un `ScrollView` — sans quoi une longue liste
+    aurait débordé de l'écran sans recours.
+  - L'écran `/demo` (outil de développement interne, hors périmètre App Store) n'a pas reçu
+    cette passe : ce n'est pas un écran du parcours utilisateur réel.

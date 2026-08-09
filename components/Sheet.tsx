@@ -9,6 +9,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { useReduceMotion } from '../hooks/useReduceMotion';
 import { couleurs, espaces, rayons } from '../theme/tokens';
 
 type SheetProps = {
@@ -24,10 +25,13 @@ const SEUIL_FERMETURE = 100;
 export function Sheet({ visible, onClose, children, accessibilityLabel }: SheetProps) {
   const insets = useSafeAreaInsets();
   const translationY = useSharedValue(DECALAGE_FERME);
+  const reduireMouvement = useReduceMotion();
+  const dureeTransition = reduireMouvement ? 0 : 220;
+  const dureeFermeture = reduireMouvement ? 0 : 200;
 
   useEffect(() => {
-    translationY.value = withTiming(visible ? 0 : DECALAGE_FERME, { duration: 220 });
-  }, [visible, translationY]);
+    translationY.value = withTiming(visible ? 0 : DECALAGE_FERME, { duration: dureeTransition });
+  }, [visible, translationY, dureeTransition]);
 
   const geste = Gesture.Pan()
     .onUpdate((evenement) => {
@@ -37,11 +41,11 @@ export function Sheet({ visible, onClose, children, accessibilityLabel }: SheetP
     })
     .onEnd((evenement) => {
       if (evenement.translationY > SEUIL_FERMETURE) {
-        translationY.value = withTiming(DECALAGE_FERME, { duration: 200 }, (fini) => {
+        translationY.value = withTiming(DECALAGE_FERME, { duration: dureeFermeture }, (fini) => {
           if (fini) runOnJS(onClose)();
         });
       } else {
-        translationY.value = withTiming(0, { duration: 200 });
+        translationY.value = withTiming(0, { duration: dureeFermeture });
       }
     });
 

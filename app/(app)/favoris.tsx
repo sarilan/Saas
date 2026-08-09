@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
 import Animated, { FadeOut } from 'react-native-reanimated';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { HookCard } from '../../components/HookCard';
 import { Cta } from '../../components/Cta';
@@ -30,13 +31,13 @@ export default function Favoris() {
   }
 
   return (
-    <View style={styles.conteneur}>
+    <SafeAreaView style={styles.conteneur} edges={['top']}>
       <View style={styles.entete}>
         <Text style={typo.titre}>{strings.onglets.favoris}</Text>
       </View>
 
       {favoris && favoris.length > 0 ? (
-        <View style={styles.liste}>
+        <ScrollView contentContainerStyle={styles.liste}>
           {favoris.map((favori, index) => (
             <Animated.View key={favori.id} exiting={FadeOut.duration(160)}>
               <Swipeable
@@ -63,7 +64,7 @@ export default function Favoris() {
               </Swipeable>
             </Animated.View>
           ))}
-        </View>
+        </ScrollView>
       ) : (
         <View style={styles.etatVide}>
           <Text style={typo.titre}>{strings.favoris.etatVideTitre}</Text>
@@ -86,7 +87,7 @@ export default function Favoris() {
           onPress={() => setAccrocheSignalee(null)}
         />
       </Sheet>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -97,12 +98,13 @@ const styles = StyleSheet.create({
   },
   entete: {
     paddingHorizontal: espaces.l,
-    paddingTop: espaces.xl,
+    paddingTop: espaces.m,
     paddingBottom: espaces.m,
   },
   liste: {
     padding: espaces.l,
     paddingTop: 0,
+    paddingBottom: espaces.xl,
     gap: espaces.m,
   },
   actionSupprimer: {

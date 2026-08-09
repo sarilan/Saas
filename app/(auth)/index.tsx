@@ -1,14 +1,8 @@
 import * as AppleAuthentication from 'expo-apple-authentication';
 import { Link, router } from 'expo-router';
 import { useEffect, useState } from 'react';
-import {
-  KeyboardAvoidingView,
-  Platform,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Alerte } from '../../components/Alerte';
 import { Cta } from '../../components/Cta';
@@ -76,67 +70,69 @@ export default function Accueil() {
   }
 
   return (
-    <KeyboardAvoidingView
-      style={styles.conteneur}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
-      <View style={styles.contenu}>
-        <View style={styles.entete}>
-          <Text style={typo.grandTitre}>{strings.commun.nomApp}</Text>
-          <Text style={[typo.corps, styles.promesse]}>{strings.accueil.promesse}</Text>
-        </View>
+    <SafeAreaView style={styles.conteneur} edges={['top', 'bottom']}>
+      <KeyboardAvoidingView
+        style={styles.conteneur}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <View style={styles.contenu}>
+          <View style={styles.entete}>
+            <Text style={typo.grandTitre}>{strings.commun.nomApp}</Text>
+            <Text style={[typo.corps, styles.promesse]}>{strings.accueil.promesse}</Text>
+          </View>
 
-        <View style={styles.formulaire}>
-          <Text style={styles.libelleChamp}>{strings.accueil.champEmail}</Text>
-          <TextInput
-            value={email}
-            onChangeText={(valeur) => {
-              setEmail(valeur);
-              if (erreur) setErreur(null);
-            }}
-            placeholder={strings.accueil.exempleEmail}
-            placeholderTextColor={couleurs.gris}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            autoComplete="email"
-            textContentType="emailAddress"
-            style={styles.champ}
-            accessibilityLabel={strings.accueil.champEmail}
-          />
-
-          {erreur ? <Alerte message={erreur} /> : null}
-
-          <Cta
-            libelle={strings.accueil.recevoirCode}
-            onPress={envoyerCode}
-            chargement={chargement}
-            desactive={email.trim().length === 0}
-          />
-
-          {appleDisponible ? (
-            <AppleAuthentication.AppleAuthenticationButton
-              buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
-              buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.WHITE}
-              cornerRadius={rayons.champ}
-              style={styles.boutonApple}
-              onPress={continuerAvecApple}
+          <View style={styles.formulaire}>
+            <Text style={styles.libelleChamp}>{strings.accueil.champEmail}</Text>
+            <TextInput
+              value={email}
+              onChangeText={(valeur) => {
+                setEmail(valeur);
+                if (erreur) setErreur(null);
+              }}
+              placeholder={strings.accueil.exempleEmail}
+              placeholderTextColor={couleurs.gris}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoComplete="email"
+              textContentType="emailAddress"
+              style={styles.champ}
+              accessibilityLabel={strings.accueil.champEmail}
             />
-          ) : null}
-        </View>
 
-        <Text style={styles.mentions}>
-          {strings.accueil.mentionLegale}{' '}
-          <Link href="/mentions-legales" style={styles.lien}>
-            {strings.accueil.lienCgu}
-          </Link>{' '}
-          {strings.accueil.liaison}{' '}
-          <Link href="/confidentialite" style={styles.lien}>
-            {strings.accueil.lienConfidentialite}
-          </Link>
-          .
-        </Text>
-      </View>
-    </KeyboardAvoidingView>
+            {erreur ? <Alerte message={erreur} /> : null}
+
+            <Cta
+              libelle={strings.accueil.recevoirCode}
+              onPress={envoyerCode}
+              chargement={chargement}
+              desactive={email.trim().length === 0}
+            />
+
+            {appleDisponible ? (
+              <AppleAuthentication.AppleAuthenticationButton
+                buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
+                buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.WHITE}
+                cornerRadius={rayons.champ}
+                style={styles.boutonApple}
+                onPress={continuerAvecApple}
+              />
+            ) : null}
+          </View>
+
+          <Text style={styles.mentions}>
+            {strings.accueil.mentionLegale}{' '}
+            <Link href="/mentions-legales" style={styles.lien}>
+              {strings.accueil.lienCgu}
+            </Link>{' '}
+            {strings.accueil.liaison}{' '}
+            <Link href="/confidentialite" style={styles.lien}>
+              {strings.accueil.lienConfidentialite}
+            </Link>
+            .
+          </Text>
+        </View>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
@@ -149,8 +145,8 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'space-between',
     padding: espaces.l,
-    paddingTop: espaces.xl * 2,
-    paddingBottom: espaces.xl,
+    paddingTop: espaces.xl,
+    paddingBottom: espaces.m,
     gap: espaces.xl,
   },
   entete: {

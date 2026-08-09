@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, router } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Alerte } from '../components/Alerte';
 import { Cta } from '../components/Cta';
@@ -82,7 +83,7 @@ export default function Paywall() {
       : null;
 
   return (
-    <View style={styles.conteneur}>
+    <SafeAreaView style={styles.conteneur} edges={['top', 'bottom']}>
       <View style={styles.entete}>
         <Text style={typo.grandTitre}>{strings.paywall.titre}</Text>
         <Pressable
@@ -171,7 +172,7 @@ export default function Paywall() {
           .
         </Text>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -185,7 +186,6 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     justifyContent: 'space-between',
     padding: espaces.l,
-    paddingTop: espaces.xl,
   },
   boutonFermer: {
     minHeight: 44,
@@ -240,7 +240,9 @@ const styles = StyleSheet.create({
   texteBadgeEconomie: {
     fontFamily: typo.microLibelle.fontFamily,
     fontSize: 10,
-    color: couleurs.craie,
+    // Sur fond violet, nuit est le seul texte qui reste conforme au
+    // contraste minimum 4,5:1 (voir Chip.tsx et Cta.tsx pour le même choix).
+    color: couleurs.nuit,
   },
   prixForfait: {
     fontFamily: typo.corps.fontFamily,

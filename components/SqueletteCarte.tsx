@@ -8,22 +8,34 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
+import { useReduceMotion } from '../hooks/useReduceMotion';
 import { couleurs, espaces } from '../theme/tokens';
 
 export function SqueletteCarte() {
   const opacite = useSharedValue(0.5);
+  const reduireMouvement = useReduceMotion();
 
   useEffect(() => {
+    if (reduireMouvement) {
+      // Pas de pulsation continue pour les utilisateurs sensibles au mouvement :
+      // une opacité fixe, ni pleine ni vide, suffit à signaler un chargement.
+      opacite.value = 0.75;
+      return;
+    }
     opacite.value = withRepeat(
       withSequence(withTiming(1, { duration: 700 }), withTiming(0.5, { duration: 700 })),
       -1
     );
-  }, [opacite]);
+  }, [opacite, reduireMouvement]);
 
   const styleAnime = useAnimatedStyle(() => ({ opacity: opacite.value }));
 
   return (
-    <Animated.View style={[styles.carte, styleAnime]}>
+    <Animated.View
+      style={[styles.carte, styleAnime]}
+      accessibilityElementsHidden
+      importantForAccessibility="no-hide-descendants"
+    >
       <View style={styles.ligneTexte} />
       <View style={[styles.ligneTexte, styles.ligneTexteCourte]} />
       <View style={styles.outils} />

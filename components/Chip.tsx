@@ -22,7 +22,7 @@ export function Chip({ libelle, selectionne, onPress, accessibilityLabel }: Chip
         pressed && styles.pressee,
       ]}
     >
-      <Text style={styles.libelle}>{libelle}</Text>
+      <Text style={[styles.libelle, selectionne && styles.libelleActif]}>{libelle}</Text>
     </Pressable>
   );
 }
@@ -51,5 +51,10 @@ const styles = StyleSheet.create({
     fontFamily: polices.medium,
     fontSize: 14,
     color: couleurs.craie,
+  },
+  // Sur fond violet, craie ne passe qu'à 3,5:1 (sous le seuil de 4,5:1) : nuit
+  // est le seul texte qui reste conforme sur ce fond (même choix que Cta).
+  libelleActif: {
+    color: couleurs.nuit,
   },
 });
