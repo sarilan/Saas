@@ -141,3 +141,17 @@ Les décisions prises en l'absence de précision explicite sont documentées ici
   l'état de chargement de l'historique à l'étape 8. Les exemples de sujet contextualisés à la
   niche (placeholder du champ) sont un texte par niche inventé pour ce projet, faute
   d'exemples fournis par le brief.
+
+- **Étape 8** : les favoris de l'écran Créer basculent désormais vraiment sur la table
+  `favoris` (la version locale de l'étape 7 est remplacée). L'écran Historique et l'écran Créer
+  restent tous les deux montés en permanence dans le `Tabs` racine ; pour transporter « sujet,
+  réglages et résultats » d'un tap sur une entrée d'historique jusqu'à l'écran Créer, un store
+  Zustand dédié (`store/reprise.ts`) sert de pont, avec un compteur de version plutôt qu'un
+  `useEffect` consommateur : la mise à jour de l'état local se fait pendant le rendu (comparaison
+  pure de version), ce qui satisfait la nouvelle règle de lint `react-hooks/set-state-in-effect`
+  sans perdre le comportement. `Swipeable` (l'API classique de react-native-gesture-handler, pas
+  `ReanimatedSwipeable` qui n'est pas encore ré-exportée publiquement dans la version installée)
+  gère le glissement latéral pour retirer un favori. Les dates de l'historique utilisent
+  `Intl.RelativeTimeFormat('fr')`, disponible nativement sur Hermes dans les versions récentes de
+  React Native ; sur une configuration plus ancienne il faudrait le polyfill
+  `@formatjs/intl-relativetimeformat`.

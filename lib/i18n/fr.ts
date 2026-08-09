@@ -64,6 +64,16 @@ export const fr = {
     } as Record<string, string>,
     exempleParDefaut: 'Décris le sujet de ta prochaine vidéo…',
   },
+  favoris: {
+    retirer: 'Retirer',
+    etatVideTitre: 'Rien en favoris pour l’instant',
+    etatVideTexte: 'Appuie sur l’étoile d’une accroche pour la garder ici.',
+  },
+  historique: {
+    etatVideTitre: 'Ton historique est vide',
+    etatVideTexte: 'Tes 20 dernières générations apparaîtront ici.',
+    accrochesCount: (n: number) => `${n} accroches`,
+  },
   compte: {
     deconnexion: 'Se déconnecter',
   },

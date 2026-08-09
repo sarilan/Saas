@@ -1,5 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { Alerte } from '../../components/Alerte';
@@ -9,10 +9,12 @@ import { HookCard } from '../../components/HookCard';
 import { Sheet } from '../../components/Sheet';
 import { SqueletteCarte } from '../../components/SqueletteCarte';
 import { useToast } from '../../components/Toast';
+import { useBasculerFavori, useFavoris } from '../../hooks/useFavoris';
 import { useInvalidationProfil, useProfil } from '../../hooks/useProfil';
 import { strings } from '../../lib/i18n';
 import { supabase } from '../../lib/supabase/client';
 import { genererAccroches } from '../../lib/supabase/generate';
+import { useRepriseStore } from '../../store/reprise';
 import { useSessionStore } from '../../store/session';
 import { couleurs, espaces, rayons, typo } from '../../theme/tokens';
 
@@ -23,19 +25,38 @@ export default function Creer() {
   const { data: profil } = useProfil();
   const invaliderProfil = useInvalidationProfil();
   const { afficherToast } = useToast();
+  const { data: favoris } = useFavoris();
+  const basculerFavori = useBasculerFavori();
+  const generationAReprendre = useRepriseStore((etat) => etat.generationAReprendre);
+  const versionReprise = useRepriseStore((etat) => etat.version);
 
   const [sujet, setSujet] = useState('');
   const [plateforme, setPlateforme] = useState<string | null>(profil?.plateforme ?? null);
   const [ton, setTon] = useState<string | null>(profil?.ton ?? null);
   const [resultats, setResultats] = useState<string[]>([]);
-  const [favorisLocaux, setFavorisLocaux] = useState<Record<string, boolean>>({});
   const [accrocheSignalee, setAccrocheSignalee] = useState<string | null>(null);
+  const [derniereVersionAppliquee, setDerniereVersionAppliquee] = useState(0);
+
+  const texteFavoris = useMemo(
+    () => new Set((favoris ?? []).map((favori) => favori.texte)),
+    [favoris]
+  );
+
+  // Applique une reprise depuis l'Historique pendant le rendu plutôt que
+  // dans un effet : c'est une pure synchronisation d'état local sur un
+  // compteur de version externe, sans effet de bord (voir store/reprise.ts).
+  if (generationAReprendre && versionReprise !== derniereVersionAppliquee) {
+    setDerniereVersionAppliquee(versionReprise);
+    setSujet(generationAReprendre.sujet);
+    setPlateforme(generationAReprendre.plateforme);
+    setTon(generationAReprendre.ton);
+    setResultats(generationAReprendre.hooks);
+  }
 
   const mutation = useMutation({
     mutationFn: genererAccroches,
     onSuccess: async (hooks) => {
       setResultats(hooks);
-      setFavorisLocaux({});
       await invaliderProfil();
     },
   });
@@ -142,9 +163,9 @@ export default function Creer() {
                 key={texte}
                 texte={texte}
                 index={index}
-                enFavori={Boolean(favorisLocaux[texte])}
+                enFavori={texteFavoris.has(texte)}
                 onToggleFavori={() =>
-                  setFavorisLocaux((precedent) => ({ ...precedent, [texte]: !precedent[texte] }))
+                  basculerFavori.mutate({ texte, enFavori: texteFavoris.has(texte) })
                 }
                 onSignaler={() => setAccrocheSignalee(texte)}
               />
