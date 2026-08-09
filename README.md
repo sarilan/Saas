@@ -30,7 +30,14 @@ npm run lint
 supabase start                     # instance locale (Docker)
 supabase db push                   # applique supabase/migrations
 supabase gen types typescript --linked > lib/supabase/types.ts
+supabase secrets set ANTHROPIC_API_KEY=sk-ant-...
+supabase functions deploy generate
 ```
+
+`SUPABASE_URL`, `SUPABASE_ANON_KEY` et `SUPABASE_SERVICE_ROLE_KEY` sont injectées
+automatiquement par la plateforme dans chaque Edge Function ; seule `ANTHROPIC_API_KEY` doit
+être définie manuellement, et uniquement comme secret de fonction — jamais dans le `.env` du
+client.
 
 ## Hypothèses
 
@@ -104,3 +111,22 @@ Les décisions prises en l'absence de précision explicite sont documentées ici
   génériques de postgrest-js : sans lui, toute méthode `.update()`/`.insert()` typée retombe
   silencieusement sur `never`. Corrigé ici — un rappel que la régénération réelle
   (`supabase gen types`) reste nécessaire dès qu'un projet est lié.
+
+- **Étape 6** : le fournisseur de modèle n'est pas nommé dans le brief — l'Edge Function
+  `generate` appelle l'API Anthropic (Claude) depuis `supabase/functions/_shared/anthropic.ts`,
+  avec la clé en secret de fonction (`ANTHROPIC_API_KEY`), jamais côté client. Pour savoir si
+  l'appelant est abonné (condition du point 2 de la logique serveur), une colonne
+  `profiles.abonnement_actif` a été ajoutée par une migration dédiée : elle n'est pas dans les
+  quatre tables du brief mais en découle directement, et sera tenue à jour par le webhook
+  RevenueCat à l'étape 9 — en attendant, elle vaut `false` par défaut, donc tout le monde passe
+  par le quota des 3 générations offertes. La modération d'entrée (section 7) n'a pas de service
+  dédié imposé par le brief : elle réutilise le même modèle en classification stricte OUI/NON
+  (prompt séparé, peu de tokens) et referme le portail par défaut si la réponse est ambiguë ou
+  si l'appel échoue (fail closed), plutôt que de laisser passer un sujet non vérifié. La limite
+  de débit (10 appels/heure) est calculée en comptant les lignes `generations` déjà insérées
+  pour l'utilisateur sur la dernière heure plutôt que via une table de compteurs séparée : ça
+  respecte le schéma à quatre tables, au prix de ne compter que les appels qui aboutissent
+  jusqu'à l'insertion (un utilisateur ne peut donc pas être bloqué par des tentatives qui
+  échouent avant ce point, ce qui reste un risque d'abus mineur à surveiller en production).
+  `tsconfig.json` exclut désormais `supabase/functions` (runtime Deno, pas Node) ; ces fichiers
+  sont vérifiés séparément avec `deno check` / `deno lint`, pas par `npm run typecheck`.

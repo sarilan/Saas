@@ -18,6 +18,7 @@ export type Database = {
           ton: string | null;
           onboarded: boolean;
           generations_restantes: number;
+          abonnement_actif: boolean;
           created_at: string;
         };
         Insert: {
@@ -27,6 +28,7 @@ export type Database = {
           ton?: string | null;
           onboarded?: boolean;
           generations_restantes?: number;
+          abonnement_actif?: boolean;
           created_at?: string;
         };
         Update: {
@@ -36,6 +38,7 @@ export type Database = {
           ton?: string | null;
           onboarded?: boolean;
           generations_restantes?: number;
+          abonnement_actif?: boolean;
           created_at?: string;
         };
         Relationships: [];
