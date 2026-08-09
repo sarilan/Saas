@@ -1,0 +1,46 @@
+# Configuration du projet Supabase local (CLI `supabase start`).
+# Référence : https://supabase.com/docs/guides/local-development/cli/config
+
+project_id = "hookgen"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public"]
+max_rows = 1000
+
+[db]
+port = 54322
+major_version = 15
+
+[studio]
+enabled = true
+port = 54323
+
+[auth]
+enabled = true
+site_url = "hookgen://"
+additional_redirect_urls = ["hookgen://"]
+jwt_expiry = 3600
+enable_signup = true
+
+[auth.email]
+enable_signup = true
+double_confirm_changes = false
+enable_confirmations = true
+# OTP à 6 chiffres envoyé par e-mail plutôt qu'un lien magique (brief 4.2 : écran Code).
+otp_length = 6
+otp_expiry = 3600
+
+[auth.external.apple]
+enabled = true
+client_id = "com.hookgen.app"
+secret = "env(SUPABASE_AUTH_APPLE_SECRET)"
+
+[edge_runtime]
+enabled = true
+
+[functions.generate]
+enabled = true
+verify_jwt = true

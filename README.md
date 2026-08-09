@@ -18,9 +18,18 @@ par étape de la section 8 du brief).
 
 ```bash
 npm install
-npm run ios      # simulateur iOS
+cp .env.example .env   # renseigner les valeurs du projet Supabase
+npm run ios             # simulateur iOS
 npm run typecheck
 npm run lint
+```
+
+## Backend Supabase
+
+```bash
+supabase start                     # instance locale (Docker)
+supabase db push                   # applique supabase/migrations
+supabase gen types typescript --linked > lib/supabase/types.ts
 ```
 
 ## Hypothèses
@@ -48,3 +57,21 @@ Les décisions prises en l'absence de précision explicite sont documentées ici
   `react-native-worklets` et `babel-preset-expo` doivent être ajoutés explicitement en
   dépendance top-level : le gestionnaire npm ne les hissait pas automatiquement dans cet
   environnement, provoquant un échec de bundling silencieux sans cet ajout.
+
+- **Étape 3** : `signalements.user_id` n'est pas déclarée en clé étrangère vers `profiles` — le
+  schéma du brief l'écrit sans le `ref ... on delete cascade` présent sur les trois autres
+  tables. Un signalement de modération doit pouvoir survivre à la suppression du compte de son
+  auteur ; la suppression de compte (étape 10) anonymisera ces lignes explicitement plutôt que
+  de compter sur une cascade. La création de la ligne `profiles` à l'inscription passe par un
+  déclencheur Postgres sur `auth.users` (`gerer_nouvel_utilisateur`), standard chez Supabase et
+  nécessaire pour que l'écran d'onboarding (étape 5) trouve toujours un profil à mettre à jour.
+  `generations_restantes` n'est modifiable que par le rôle `service_role` : la policy UPDATE de
+  `profiles` est restreinte par colonne (`grant update (niche, plateforme, ton, onboarded)`) et
+  doublée d'un déclencheur qui annule toute tentative de modification du quota par un autre
+  rôle — défense en profondeur pour le critère d'acceptation « le quota résiste à la triche ».
+  `lib/supabase/types.ts` est écrit à la main : en l'absence de projet Supabase distant lié
+  pendant la réalisation, la commande `supabase gen types typescript --linked` ne peut pas
+  s'exécuter ici. À relancer pour régénérer ce fichier dès qu'un projet réel est lié. Le client
+  Supabase (`lib/supabase/client.ts`) lève une erreur explicite si les variables
+  `EXPO_PUBLIC_SUPABASE_URL` / `EXPO_PUBLIC_SUPABASE_ANON_KEY` sont absentes plutôt que
+  d'échouer silencieusement plus tard ; voir `.env.example`.
