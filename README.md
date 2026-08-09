@@ -130,3 +130,14 @@ Les décisions prises en l'absence de précision explicite sont documentées ici
   échouent avant ce point, ce qui reste un risque d'abus mineur à surveiller en production).
   `tsconfig.json` exclut désormais `supabase/functions` (runtime Deno, pas Node) ; ces fichiers
   sont vérifiés séparément avec `deno check` / `deno lint`, pas par `npm run typecheck`.
+
+- **Étape 7** : le signalement (appui long sur une accroche) écrit directement dans la table
+  `signalements` depuis le client — la RLS de l'étape 3 l'autorise déjà et le brief ne prévoit
+  pas d'Edge Function dédiée à cette action, contrairement à `generate`. Les favoris affichés
+  sur l'écran Créer sont pour l'instant un état local (étoile qui bascule visuellement) : la
+  persistance réelle dans la table `favoris` arrive à l'étape 8, qui couvre justement « favoris
+  et historique, avec synchronisation serveur ». `SqueletteCarte` (nouveau composant partagé)
+  reprend le gabarit de `HookCard` avec des barres qui pulsent : prévu pour être réutilisé par
+  l'état de chargement de l'historique à l'étape 8. Les exemples de sujet contextualisés à la
+  niche (placeholder du champ) sont un texte par niche inventé pour ce projet, faute
+  d'exemples fournis par le brief.
