@@ -184,3 +184,17 @@ Les décisions prises en l'absence de précision explicite sont documentées ici
   section 5. Le compte de démonstration avec accès Pro actif pour les revieweurs Apple
   (guideline 2.1) est une tâche opérationnelle sur le dashboard RevenueCat/App Store Connect,
   documentée dans les notes de revue à l'étape 12, pas dans le code.
+
+- **Étape 10** : la suppression de compte passe par une nouvelle Edge Function
+  (`supabase/functions/delete-account`) plutôt qu'un appel client direct : supprimer une ligne
+  `auth.users` nécessite la clé de service, jamais exposée côté client. `profiles`,
+  `generations` et `favoris` disparaissent par cascade ; `signalements` — sans cascade par
+  décision de l'étape 3 — est explicitement vidé pour cet utilisateur dans la même fonction,
+  pour respecter la guideline 5.1.1(v) (« efface les données côté serveur »). Le parcours tient
+  en deux taps : ouvrir la feuille de confirmation, puis confirmer. Le texte de confirmation
+  prévient qu'un abonnement Apple actif doit être annulé séparément, la suppression du compte
+  n'annulant pas automatiquement un abonnement StoreKit. Niche/plateforme/ton deviennent
+  modifiables directement depuis Compte (écriture client autorisée par le grant par colonne posé
+  à l'étape 3) sans repasser par l'onboarding. Les liens CGU/confidentialité et l'adresse de
+  contact (section 7, point 3) sont désormais aussi présents sur Compte, en plus de l'accueil et
+  du paywall.

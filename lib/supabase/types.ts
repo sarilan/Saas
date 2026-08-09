@@ -126,6 +126,7 @@ export type Database = {
 };
 
 export type Profil = Database['public']['Tables']['profiles']['Row'];
+export type ProfilUpdate = Database['public']['Tables']['profiles']['Update'];
 export type Generation = Database['public']['Tables']['generations']['Row'];
 export type Favori = Database['public']['Tables']['favoris']['Row'];
 export type Signalement = Database['public']['Tables']['signalements']['Row'];
