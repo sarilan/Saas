@@ -1,4 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
+import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
@@ -150,7 +151,12 @@ export default function Creer() {
         />
 
         {messageErreur ? <Alerte message={messageErreur} /> : null}
-        {quotaEpuise ? <Alerte message={strings.creer.quotaEpuise} /> : null}
+        {quotaEpuise ? (
+          <View style={styles.blocQuotaEpuise}>
+            <Alerte message={strings.creer.quotaEpuise} />
+            <Cta libelle={strings.compteAbonnement.sAbonner} onPress={() => router.push('/paywall')} />
+          </View>
+        ) : null}
 
         <View style={styles.resultats}>
           {mutation.isPending ? (
@@ -252,6 +258,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: espaces.s,
+  },
+  blocQuotaEpuise: {
+    gap: espaces.m,
   },
   resultats: {
     gap: espaces.m,

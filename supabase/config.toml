@@ -44,3 +44,10 @@ enabled = true
 [functions.generate]
 enabled = true
 verify_jwt = true
+
+# Le webhook RevenueCat n'envoie pas de JWT Supabase : il est authentifié
+# par un secret partagé vérifié dans la fonction elle-même (voir
+# REVENUECAT_WEBHOOK_SECRET), pas par la vérification JWT de la plateforme.
+[functions.revenuecat-webhook]
+enabled = true
+verify_jwt = false

@@ -18,6 +18,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ToastProvider } from '../components/Toast';
 import { useProfil } from '../hooks/useProfil';
 import { useEcouteSession } from '../lib/navigation/useEcouteSession';
+import { usePurchasesSync } from '../lib/navigation/usePurchasesSync';
 import { queryClient } from '../lib/queryClient';
 import { useSessionStore } from '../store/session';
 import { couleurs } from '../theme/tokens';
@@ -59,6 +60,7 @@ export default function RootLayout() {
 
 function NavigationProtegee() {
   useEcouteSession();
+  usePurchasesSync();
 
   const session = useSessionStore((etat) => etat.session);
   const pretAuthentification = useSessionStore((etat) => etat.pretAuthentification);
@@ -96,6 +98,7 @@ function NavigationProtegee() {
       <Stack.Screen name="demo" />
       <Stack.Screen name="mentions-legales" />
       <Stack.Screen name="confidentialite" />
+      <Stack.Screen name="paywall" options={{ presentation: 'modal' }} />
     </Stack>
   );
 }

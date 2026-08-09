@@ -31,8 +31,13 @@ supabase start                     # instance locale (Docker)
 supabase db push                   # applique supabase/migrations
 supabase gen types typescript --linked > lib/supabase/types.ts
 supabase secrets set ANTHROPIC_API_KEY=sk-ant-...
+supabase secrets set REVENUECAT_WEBHOOK_SECRET=... REVENUECAT_SECRET_API_KEY=sk_...
 supabase functions deploy generate
+supabase functions deploy revenuecat-webhook
 ```
+
+Configurer ensuite dans le dashboard RevenueCat un webhook pointant vers l'URL de la fonction
+`revenuecat-webhook`, avec un en-tête `Authorization: Bearer <REVENUECAT_WEBHOOK_SECRET>`.
 
 `SUPABASE_URL`, `SUPABASE_ANON_KEY` et `SUPABASE_SERVICE_ROLE_KEY` sont injectées
 automatiquement par la plateforme dans chaque Edge Function ; seule `ANTHROPIC_API_KEY` doit
@@ -155,3 +160,27 @@ Les décisions prises en l'absence de précision explicite sont documentées ici
   `Intl.RelativeTimeFormat('fr')`, disponible nativement sur Hermes dans les versions récentes de
   React Native ; sur une configuration plus ancienne il faudrait le polyfill
   `@formatjs/intl-relativetimeformat`.
+
+- **Étape 9** : les identifiants de produit (`hookgen.pro.mensuel`, `hookgen.pro.annuel`) et le
+  groupe d'abonnement doivent être créés dans App Store Connect puis mappés à une offre
+  RevenueCat ; le paywall n'affiche que ce que renvoient les objets `PurchasesPackage` /
+  `PurchasesStoreProduct` (nom, prix, période, prix mensuel équivalent), jamais de constante —
+  conforme à la guideline 3.1.2. L'identifiant d'entitlement RevenueCat est fixé à `pro`
+  (`IDENTIFIANT_ENTITLEMENT_PRO` dans `lib/purchases.ts`), une convention prise faute de valeur
+  imposée par le brief, à faire correspondre au dashboard réel. `Purchases.logIn(userId)` est
+  appelé avec l'id utilisateur Supabase dès qu'une session existe, pour que le webhook
+  RevenueCat sache à quel `profiles.id` rattacher un événement. Ce webhook
+  (`supabase/functions/revenuecat-webhook`) ne cherche pas à interpréter le champ `event.type`
+  (fragile) mais relit l'état d'abonné faisant autorité via l'API REST RevenueCat à chaque
+  appel, comme recommandé par RevenueCat elle-même, puis écrit `abonnement_actif` en base — le
+  client ne peut pas modifier cette colonne (grant restreint posé à l'étape 6). Après un achat ou
+  une restauration, le profil est réinvalidé plusieurs fois avec un léger délai pour rattraper la
+  propagation asynchrone du webhook, l'app ne bloquant jamais l'utilisateur en attendant. Le
+  paywall est une route top-level (`app/paywall.tsx`, présentée en modal) plutôt qu'un écran
+  dans `(app)` : il doit rester atteignable depuis Créer (quota épuisé) et depuis Compte sans
+  faire partie de la navigation par onglets. « Restaurer mes achats » est présent à la fois sur
+  le paywall et sur Compte, et la gestion d'abonnement pointe vers
+  `itms-apps://apps.apple.com/account/subscriptions`, conformément aux points 4 et 5 de la
+  section 5. Le compte de démonstration avec accès Pro actif pour les revieweurs Apple
+  (guideline 2.1) est une tâche opérationnelle sur le dashboard RevenueCat/App Store Connect,
+  documentée dans les notes de revue à l'étape 12, pas dans le code.
